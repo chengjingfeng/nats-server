@@ -4944,6 +4944,8 @@ func (c *client) doTLSClientHandshake(typ string, url *url.URL, tlsConfig *tls.C
 //
 // Lock is held on entry.
 func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfig *tls.Config, tlsName string, timeout float64, pCerts PinnedCertSet) (bool, error) {
+	name := c.srv.opts.ServerName
+
 	var host string
 	var resetTLSName bool
 	var err error
@@ -4953,6 +4955,8 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 
 	// If we solicited, we will act like the client, otherwise the server.
 	if solicit {
+		c.Debugf("--> [%s] tls CLIENT %v %v %v", name, typ, tlsConfig.VerifyConnection, tlsConfig.GetClientCertificate)
+		// NOTE: Here it is the leafnode client connection to the leafnode server!!!
 		c.Debugf("Starting TLS %s client handshake", typ)
 		if tlsConfig.ServerName == _EMPTY_ {
 			// If the given url is a hostname, use this hostname for the
@@ -4971,6 +4975,10 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 		} else {
 			c.Debugf("Starting TLS %s server handshake", typ)
 		}
+		c.Debugf("--> [%s] tls SERVER!!!!: %v %v %v", name, typ, tlsConfig.VerifyConnection, tlsConfig.GetClientCertificate)
+		// tlsConfig.GetClientCertificate = nil
+
+		// NOTE: Here we are accepting a connection from a client
 		c.nc = tls.Server(c.nc, tlsConfig)
 	}
 

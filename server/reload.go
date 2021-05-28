@@ -1026,7 +1026,7 @@ func (s *Server) diffOptions(newOpts *Options) ([]option, error) {
 			// If there is really a change prevents reload.
 			if !reflect.DeepEqual(tmpOld, tmpNew) {
 				// See TODO(ik) note below about printing old/new values.
-				return nil, fmt.Errorf("config reload not supported for %s: old=%v, new=%v",
+				return nil, fmt.Errorf("config reload not supported for %s: old=%+v, new=%+v",
 					field.Name, oldValue, newValue)
 			}
 		case "leafnode":
@@ -1084,7 +1084,7 @@ func (s *Server) diffOptions(newOpts *Options) ([]option, error) {
 			// If there is really a change prevents reload.
 			if !reflect.DeepEqual(tmpOld, tmpNew) {
 				// See TODO(ik) note below about printing old/new values.
-				return nil, fmt.Errorf("config reload not supported for %s: old=%v, new=%v",
+				return nil, fmt.Errorf("config reload not supported for %s: old=%+v, new=%+v",
 					field.Name, oldValue, newValue)
 			}
 		case "jetstream":
@@ -1343,87 +1343,87 @@ func (s *Server) applyOptions(ctx *reloadContext, opts []option) {
 }
 
 func (s *Server) reloadOCSP() error {
-	sopts := s.getOpts()
+	// sopts := s.getOpts()
 
-	if err := s.setupOCSPStapleStoreDir(); err != nil {
-		return err
-	}
+	// if err := s.setupOCSPStapleStoreDir(); err != nil {
+	// 	return err
+	// }
 
-	s.mu.Lock()
-	ocsps := s.ocsps
-	s.mu.Unlock()
+	// s.mu.Lock()
+	// ocsps := s.ocsps
+	// s.mu.Unlock()
 
-	// Stop all OCSP Stapling monitors in case there were any running.
-	for _, oc := range ocsps {
-		oc.stop()
-	}
+	// // Stop all OCSP Stapling monitors in case there were any running.
+	// for _, oc := range ocsps {
+	// 	oc.stop()
+	// }
 
-	type ocspState struct {
-		config     *tls.Config
-		wasEnabled bool
-	}
-	withOCSP := make(map[string]ocspState)
+	// type ocspState struct {
+	// 	config     *tls.Config
+	// 	wasEnabled bool
+	// }
+	// withOCSP := make(map[string]ocspState)
 
-	// Start OCSP Stapling for client connections.
-	if config := sopts.TLSConfig; config != nil {
-		withOCSP[typeStringMap[CLIENT]] = ocspState{config, true}
-	}
-	if config := sopts.Cluster.TLSConfig; config != nil {
-		withOCSP[typeStringMap[ROUTER]] = ocspState{config, true}
-	}
-	if config := sopts.LeafNode.TLSConfig; config != nil {
-		withOCSP[typeStringMap[LEAF]] = ocspState{config, true}
-	}
-	if config := sopts.Gateway.TLSConfig; config != nil {
-		withOCSP[typeStringMap[GATEWAY]] = ocspState{config, true}
-	}
-	if config := sopts.Websocket.TLSConfig; config != nil {
-		withOCSP["WebSocket"] = ocspState{config, true}
-	}
-	if config := sopts.MQTT.TLSConfig; config != nil {
-		withOCSP["MQTT"] = ocspState{config, true}
-	}
+	// // Start OCSP Stapling for client connections.
+	// if config := sopts.TLSConfig; config != nil {
+	// 	withOCSP[typeStringMap[CLIENT]] = ocspState{config, true}
+	// }
+	// if config := sopts.Cluster.TLSConfig; config != nil {
+	// 	withOCSP[typeStringMap[ROUTER]] = ocspState{config, true}
+	// }
+	// if config := sopts.LeafNode.TLSConfig; config != nil {
+	// 	withOCSP[typeStringMap[LEAF]] = ocspState{config, true}
+	// }
+	// if config := sopts.Gateway.TLSConfig; config != nil {
+	// 	withOCSP[typeStringMap[GATEWAY]] = ocspState{config, true}
+	// }
+	// if config := sopts.Websocket.TLSConfig; config != nil {
+	// 	withOCSP["WebSocket"] = ocspState{config, true}
+	// }
+	// if config := sopts.MQTT.TLSConfig; config != nil {
+	// 	withOCSP["MQTT"] = ocspState{config, true}
+	// }
 
-	// Restart the monitors under the new configuration.
-	ocspm := make([]*OCSPMonitor, 0)
-	for kind, config := range withOCSP {
-		tc, mon, err := s.NewOCSPMonitor(kind, config.config)
-		if err != nil {
-			return err
-		}
-		// Check if an OCSP stapling monitor is required for this certificate.
-		if mon != nil {
-			s.Noticef("OCSP Stapling enabled for %s connections", kind)
-			switch kind {
-			case typeStringMap[CLIENT]:
-				sopts.TLSConfig = tc
-			case typeStringMap[ROUTER]:
-				sopts.Cluster.TLSConfig = tc
-			case typeStringMap[LEAF]:
-				sopts.LeafNode.TLSConfig = tc
-			case typeStringMap[GATEWAY]:
-				sopts.Gateway.TLSConfig = tc
-			case "WebSocket":
-				sopts.Websocket.TLSConfig = tc
-			case "MQTT":
-				sopts.MQTT.TLSConfig = tc
-			}
+	// // Restart the monitors under the new configuration.
+	// ocspm := make([]*OCSPMonitor, 0)
+	// for kind, config := range withOCSP {
+	// 	tc, mon, err := s.NewOCSPMonitor(kind, config.config)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	// Check if an OCSP stapling monitor is required for this certificate.
+	// 	if mon != nil {
+	// 		s.Noticef("OCSP Stapling enabled for %s connections", kind)
+	// 		switch kind {
+	// 		case typeStringMap[CLIENT]:
+	// 			sopts.TLSConfig = tc
+	// 		case typeStringMap[ROUTER]:
+	// 			sopts.Cluster.TLSConfig = tc
+	// 		case typeStringMap[LEAF]:
+	// 			sopts.LeafNode.TLSConfig = tc
+	// 		case typeStringMap[GATEWAY]:
+	// 			sopts.Gateway.TLSConfig = tc
+	// 		case "WebSocket":
+	// 			sopts.Websocket.TLSConfig = tc
+	// 		case "MQTT":
+	// 			sopts.MQTT.TLSConfig = tc
+	// 		}
 
-			ocspm = append(ocspm, mon)
+	// 		ocspm = append(ocspm, mon)
 
-			// Override the TLS config with one that has OCSP enabled.
-			s.optsMu.Lock()
-			s.opts.TLSConfig = tc
-			s.optsMu.Unlock()
-			s.startGoRoutine(func() { mon.run() })
-		} else if config.wasEnabled {
-			s.Warnf("OCSP Stapling disabled for %s connections", kind)
-		}
-	}
-	// Replace stopped monitors with the new ones.
-	s.mu.Lock()
-	s.ocsps = ocspm
-	s.mu.Unlock()
+	// 		// Override the TLS config with one that has OCSP enabled.
+	// 		s.optsMu.Lock()
+	// 		s.opts.TLSConfig = tc
+	// 		s.optsMu.Unlock()
+	// 		s.startGoRoutine(func() { mon.run() })
+	// 	} else if config.wasEnabled {
+	// 		s.Warnf("OCSP Stapling disabled for %s connections", kind)
+	// 	}
+	// }
+	// // Replace stopped monitors with the new ones.
+	// s.mu.Lock()
+	// s.ocsps = ocspm
+	// s.mu.Unlock()
 
 	return nil
 }

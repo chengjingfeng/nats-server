@@ -2181,9 +2181,14 @@ func (c *client) leafNodeGetTLSConfigForSolicit(remote *leafNodeCfg, needsLock b
 	}
 	tlsRequired := remote.TLS || remote.TLSConfig != nil
 	if tlsRequired {
+		c.Noticef("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA %+v", remote.TLSConfig)
 		if remote.TLSConfig != nil {
-			tlsConfig = remote.TLSConfig.Clone()
+			cloned := remote.TLSConfig.Clone()
+			c.Noticef("---------------- ORIG  %v", remote.TLSConfig.VerifyConnection)
+			c.Noticef("---------------- CLONED %v", cloned.VerifyConnection)
+			tlsConfig = cloned
 		} else {
+			c.Noticef(">>>>>>>>>>>>>>>> AAAAAAAAAAAAAAADDDDDDDDDDDDDDDDDDDDVVVVVVVVVVVVVVVVVVVVVV")
 			tlsConfig = &tls.Config{MinVersion: tls.VersionTLS12}
 		}
 		tlsName = remote.tlsName
@@ -2341,6 +2346,7 @@ func (s *Server) leafNodeResumeConnectProcess(c *client) {
 		return
 	}
 	remote := c.leaf.remote
+	s.Debugf("WEEEEEEEEEEEEEEEEEEEEEEEE %+v", remote.TLSConfig.GetClientCertificate)
 
 	var tlsRequired bool
 
@@ -2353,6 +2359,7 @@ func (s *Server) leafNodeResumeConnectProcess(c *client) {
 
 		// Check if TLS is required and gather TLS config variables.
 		tlsRequired, tlsConfig, tlsName, tlsTimeout = c.leafNodeGetTLSConfigForSolicit(remote, true)
+		s.Debugf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ %v || %v", tlsConfig.GetClientCertificate, tlsConfig.VerifyConnection)
 
 		// If TLS required, peform handshake.
 		if tlsRequired {
