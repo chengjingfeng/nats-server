@@ -4953,6 +4953,7 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 	// Capture kind for some debug/error statements.
 	kind := c.kind
 
+	/*
 	// HACK! FIX THIS!!!!
 	var rurl string
 	if url != nil {
@@ -4966,6 +4967,7 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 		// Configure tls.Config for leafnode client.
 		tlsConfig.GetCertificate = nil
 	}
+	*/
 
 	// If we solicited, we will act like the client, otherwise the server.
 	if solicit {
@@ -4982,6 +4984,12 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 			}
 			tlsConfig.ServerName = host
 		}
+
+		if typ == "leafnode" {
+			// Configure tls.Config for leafnode client.
+			tlsConfig.GetCertificate = nil
+		}
+
 		c.nc = tls.Client(c.nc, tlsConfig)
 	} else {
 		if kind == CLIENT {
@@ -4991,6 +4999,12 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 		}
 		c.Debugf("--> [%s] tls SERVER!!!!: %v %v %v", name, typ, tlsConfig.VerifyConnection, tlsConfig.GetClientCertificate)
 		// tlsConfig.GetClientCertificate = nil
+
+		// Configure tls.Config for leafnode server.
+		if typ == "leafnode" {
+			tlsConfig.ClientAuth = tls.RequireAndVerifyClientCert
+			tlsConfig.GetClientCertificate = nil
+		}
 
 		// NOTE: Here we are accepting a connection from a client
 		c.nc = tls.Server(c.nc, tlsConfig)
