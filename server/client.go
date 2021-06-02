@@ -4985,7 +4985,7 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 			tlsConfig.ServerName = host
 		}
 
-		if typ == "leafnode" {
+		if typ == "leafnode" || typ == "gateway" {
 			// Configure tls.Config for leafnode client.
 			tlsConfig.GetCertificate = nil
 		}
@@ -5001,7 +5001,7 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 		// tlsConfig.GetClientCertificate = nil
 
 		// Configure tls.Config for leafnode server.
-		if typ == "leafnode" {
+		if typ == "leafnode" || typ == "gateway" {
 			tlsConfig.ClientAuth = tls.RequireAndVerifyClientCert
 			tlsConfig.GetClientCertificate = nil
 		}
