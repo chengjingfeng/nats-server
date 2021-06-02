@@ -1439,6 +1439,8 @@ func TestOCSPLeaf(t *testing.T) {
 		host: "127.0.0.1"
 		port: -1
 
+		server_name: "AAA"
+
 		tls {
 			cert_file: "configs/certs/ocsp/server-status-request-url-07-cert.pem"
 			key_file: "configs/certs/ocsp/server-status-request-url-07-key.pem"
