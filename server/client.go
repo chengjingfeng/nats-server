@@ -4953,6 +4953,20 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 	// Capture kind for some debug/error statements.
 	kind := c.kind
 
+	// HACK! FIX THIS!!!!
+	var rurl string
+	if url != nil {
+		rurl = url.String()
+	}
+	if typ == "leafnode" && rurl == "" {
+		// Configure tls.Config for leafnode server.
+		tlsConfig.ClientAuth = tls.RequireAndVerifyClientCert
+		tlsConfig.GetClientCertificate = nil
+	} else if typ == "leafnode" && rurl != "" {
+		// Configure tls.Config for leafnode client.
+		tlsConfig.GetCertificate = nil
+	}
+
 	// If we solicited, we will act like the client, otherwise the server.
 	if solicit {
 		c.Debugf("--> [%s] tls CLIENT %v %v %v", name, typ, tlsConfig.VerifyConnection, tlsConfig.GetClientCertificate)
