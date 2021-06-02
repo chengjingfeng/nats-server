@@ -1037,7 +1037,7 @@ func TestOCSPClusterReload(t *testing.T) {
 			timeout: 5
 		}
 		store_dir: "%s"
-		cluster { 
+		cluster {
 			name: AB
 			host: "127.0.0.1"
 			advertise: localhost
@@ -1100,7 +1100,7 @@ func TestOCSPClusterReload(t *testing.T) {
 			timeout: 5
 		}
 		store_dir: "%s"
-		cluster { 
+		cluster {
 			name: AB
 			host: "127.0.0.1"
 			advertise: localhost
@@ -1271,7 +1271,7 @@ func TestOCSPLeaf(t *testing.T) {
 		leafnodes {
 			host: "127.0.0.1"
 			port: -1
-			advertise: localhost
+			advertise: "127.0.0.1"
 
 			tls {
 				cert_file: "configs/certs/ocsp/server-status-request-url-02-cert.pem"
@@ -1301,9 +1301,9 @@ func TestOCSPLeaf(t *testing.T) {
 			timeout: 5
 		}
 		store_dir: "%s"
-		leafnodes { 
+		leafnodes {
 			remotes: [ {
-				url: tls://localhost:%d
+				url: "tls://127.0.0.1:%d"
 				tls {
 					cert_file: "configs/certs/ocsp/server-status-request-url-04-cert.pem"
 					key_file: "configs/certs/ocsp/server-status-request-url-04-key.pem"
@@ -1320,7 +1320,7 @@ func TestOCSPLeaf(t *testing.T) {
 	defer srvB.Shutdown()
 
 	// Client connects to server A.
-	cA, err := nats.Connect(fmt.Sprintf("tls://localhost:%d", optsA.Port),
+	cA, err := nats.Connect(fmt.Sprintf("tls://127.0.0.1:%d", optsA.Port),
 		nats.Secure(&tls.Config{
 			VerifyConnection: func(s tls.ConnectionState) error {
 				if s.OCSPResponse == nil {
@@ -1360,9 +1360,9 @@ func TestOCSPLeaf(t *testing.T) {
 			timeout: 5
 		}
 		store_dir: "%s"
-		leafnodes { 
+		leafnodes {
 			remotes: [ {
-				url: tls://localhost:%d
+				url: "tls://127.0.0.1:%d"
 				tls {
 					cert_file: "configs/certs/ocsp/server-status-request-url-06-cert.pem"
 					key_file: "configs/certs/ocsp/server-status-request-url-06-key.pem"
@@ -1378,7 +1378,7 @@ func TestOCSPLeaf(t *testing.T) {
 	srvC, optsC := RunServerWithConfig(conf)
 	defer srvC.Shutdown()
 
-	cB, err := nats.Connect(fmt.Sprintf("tls://localhost:%d", optsB.Port),
+	cB, err := nats.Connect(fmt.Sprintf("tls://127.0.0.1:%d", optsB.Port),
 		nats.Secure(&tls.Config{
 			VerifyConnection: func(s tls.ConnectionState) error {
 				if s.OCSPResponse == nil {
@@ -1393,7 +1393,7 @@ func TestOCSPLeaf(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cC, err := nats.Connect(fmt.Sprintf("tls://localhost:%d", optsC.Port),
+	cC, err := nats.Connect(fmt.Sprintf("tls://127.0.0.1:%d", optsC.Port),
 		nats.Secure(&tls.Config{
 			VerifyConnection: func(s tls.ConnectionState) error {
 				if s.OCSPResponse == nil {
@@ -1451,7 +1451,7 @@ func TestOCSPLeaf(t *testing.T) {
 		leafnodes {
 			host: "127.0.0.1"
 			port: -1
-			advertise: localhost
+			advertise: "127.0.0.1"
 
 			tls {
 				cert_file: "configs/certs/ocsp/server-status-request-url-08-cert.pem"
