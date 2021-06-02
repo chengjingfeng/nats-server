@@ -4968,6 +4968,9 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 		tlsConfig.GetCertificate = nil
 	}
 	*/
+	c.Debugf("doTLSHandshake - typ=%q - tlsConfig.GetCertificate nil: %t", typ, tlsConfig.GetCertificate == nil)
+	c.Debugf("doTLSHandshake - typ=%q - tlsConfig.VerifyConnection nil: %t", typ, tlsConfig.VerifyConnection == nil)
+	c.Debugf("doTLSHandshake - typ=%q - tlsConfig.GetClientCertificate nil: %t", typ, tlsConfig.GetCertificate == nil)
 
 	// If we solicited, we will act like the client, otherwise the server.
 	if solicit {
