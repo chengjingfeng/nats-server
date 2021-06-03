@@ -795,10 +795,16 @@ func (s *Server) createGateway(cfg *gatewayCfg, url *url.URL, conn net.Conn) {
 			tlsConfig = cfg.TLSConfig.Clone()
 			timeout = cfg.TLSTimeout
 			cfg.RUnlock()
+			c.Debugf("createGateway - serverName=%q - using cfg.TLSConfig.Clone", opts.ServerName)
 		} else {
 			tlsConfig = opts.Gateway.TLSConfig
 			timeout = opts.Gateway.TLSTimeout
+			c.Debugf("createGateway - serverName=%q - using opts.Gateway.TLSConfig", opts.ServerName)
 		}
+
+		c.Debugf("createGateway - serverName=%q - tlsConfig.GetCertificate nil: %t", opts.ServerName, tlsConfig.GetCertificate == nil)
+		c.Debugf("createGateway - serverName=%q - tlsConfig.VerifyConnection nil: %t", opts.ServerName, tlsConfig.VerifyConnection == nil)
+		c.Debugf("createGateway - serverName=%q - tlsConfig.GetClientCertificate nil: %t", opts.ServerName, tlsConfig.GetCertificate == nil)
 
 		// Perform (either server or client side) TLS handshake.
 		if resetTLSName, err := c.doTLSHandshake("gateway", solicit, url, tlsConfig, tlsName, timeout, opts.Gateway.TLSPinnedCerts); err != nil {

@@ -1564,7 +1564,16 @@ func TestOCSPGateway(t *testing.T) {
 			host: "127.0.0.1"
 			advertise: "127.0.0.1"
 			port: -1
-			gateways: [{name: "A", url: "nats://127.0.0.1:%d" }]
+			gateways: [{
+				name: "A"
+				url: "nats://127.0.0.1:%d"
+				tls {
+					cert_file: "configs/certs/ocsp/server-status-request-url-04-cert.pem"
+					key_file: "configs/certs/ocsp/server-status-request-url-04-key.pem"
+					ca_file: "configs/certs/ocsp/ca-cert.pem"
+					timeout: 5
+				}
+			}]
 			tls {
 				cert_file: "configs/certs/ocsp/server-status-request-url-04-cert.pem"
 				key_file: "configs/certs/ocsp/server-status-request-url-04-key.pem"

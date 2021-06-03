@@ -1493,7 +1493,7 @@ type tlsConfigKind struct {
 	tlsOpts   *TLSConfigOpts
 	kind      string
 	enabled   bool
-	apply     func(*tls.Config)
+	apply     func(string, *tls.Config)
 }
 
 func (s *Server) enableOCSP() error {
@@ -1508,7 +1508,7 @@ func (s *Server) enableOCSP() error {
 			kind:      typeStringMap[CLIENT],
 			tlsConfig: config,
 			tlsOpts:   opts,
-			apply:     func(tc *tls.Config) { sopts.TLSConfig = tc },
+			apply:     func(kind string, tc *tls.Config) { sopts.TLSConfig = tc },
 		}
 		configs = append(configs, o)
 	}
@@ -1518,7 +1518,7 @@ func (s *Server) enableOCSP() error {
 			kind:      typeStringMap[ROUTER],
 			tlsConfig: config,
 			tlsOpts:   opts,
-			apply:     func(tc *tls.Config) { sopts.Cluster.TLSConfig = tc },
+			apply:     func(kind string, tc *tls.Config) { sopts.Cluster.TLSConfig = tc },
 		}
 		configs = append(configs, o)
 	}
@@ -1528,7 +1528,7 @@ func (s *Server) enableOCSP() error {
 			kind:      typeStringMap[LEAF],
 			tlsConfig: config,
 			tlsOpts:   opts,
-			apply:     func(tc *tls.Config) { sopts.LeafNode.TLSConfig = tc },
+			apply:     func(kind string, tc *tls.Config) { sopts.LeafNode.TLSConfig = tc },
 		}
 		configs = append(configs, o)
 	}
@@ -1540,7 +1540,7 @@ func (s *Server) enableOCSP() error {
 				kind:      typeStringMap[LEAF],
 				tlsConfig: config,
 				tlsOpts:   opts,
-				apply: func(tc *tls.Config) {
+				apply: func(kind string, tc *tls.Config) {
 					fmt.Printf(">>>>>>  Applying config for remote %d ||| %+v\n", i, remote)
 					fmt.Printf(">>>>>>  Applying config for remote %d ||| %+v\n", i, tc.VerifyConnection)
 					// tc.GetCertificate = nil
@@ -1556,19 +1556,33 @@ func (s *Server) enableOCSP() error {
 			kind:      typeStringMap[GATEWAY],
 			tlsConfig: config,
 			tlsOpts:   opts,
-			apply:     func(tc *tls.Config) { sopts.Gateway.TLSConfig = tc },
+			apply:     func(kind string, tc *tls.Config) {
+				sopts.Gateway.TLSConfig = tc
+				s.Debugf("enableOCSP - serverName=%q - kind=%q - sopts.Gateway.TLSConfig.GetCertificate nil: %t", sopts.ServerName, kind, tc.GetCertificate == nil)
+				s.Debugf("enableOCSP - serverName=%q - kind=%q - sopts.Gateway.TLSConfig.VerifyConnection nil: %t", sopts.ServerName, kind, tc.VerifyConnection == nil)
+				s.Debugf("enableOCSP - serverName=%q - kind=%q - sopts.Gateway.TLSConfig.GetClientCertificate nil: %t", sopts.ServerName, kind, tc.GetCertificate == nil)
+			},
 		}
 		configs = append(configs, o)
 	}
+	s.Debugf("enableOCSP - serverName=%q - len(sopts.Gateway.Gateways)=%d", sopts.ServerName, len(sopts.Gateway.Gateways))
 	for i, remote := range sopts.Gateway.Gateways {
 		opts := remote.tlsConfigOpts
+
+		s.Debugf("enableOCSP - serverName=%q - remote.tlsConfigOpts nil: %t", sopts.ServerName, remote.tlsConfigOpts == nil)
+		s.Debugf("enableOCSP - serverName=%q - remote.TLSConfig nil: %t", sopts.ServerName, remote.TLSConfig == nil)
+
 		if config := remote.TLSConfig; config != nil {
+			s.Debugf("enableOCSP - serverName=%q - config NOT NIL", sopts.ServerName)
 			o := &tlsConfigKind{
 				kind:      typeStringMap[GATEWAY],
 				tlsConfig: config,
 				tlsOpts:   opts,
-				apply: func(tc *tls.Config) {
+				apply: func(kind string, tc *tls.Config) {
 					sopts.Gateway.Gateways[i].TLSConfig = tc
+					s.Debugf("enableOCSP - serverName=%q - kind=%q - sopts.Gateway.Gateways[i].TLSConfig.GetCertificate nil: %t", sopts.ServerName, kind, tc.GetCertificate == nil)
+					s.Debugf("enableOCSP - serverName=%q - kind=%q - sopts.Gateway.Gateways[i].TLSConfig.VerifyConnection nil: %t", sopts.ServerName, kind, tc.VerifyConnection == nil)
+					s.Debugf("enableOCSP - serverName=%q - kind=%q - sopts.Gateway.Gateways[i].TLSConfig.GetClientCertificate nil: %t", sopts.ServerName, kind, tc.GetCertificate == nil)
 				},
 			}
 			configs = append(configs, o)
@@ -1588,6 +1602,7 @@ func (s *Server) enableOCSP() error {
 			// There should be no OCSP Stapling errors on boot.
 			return err
 		}
+
 		// Check if an OCSP stapling monitor is required for this certificate.
 		if mon != nil {
 			s.Noticef("OCSP Stapling enabled for %s connections", kind)
@@ -1595,7 +1610,7 @@ func (s *Server) enableOCSP() error {
 			s.ocsps = append(s.ocsps, mon)
 
 			// Override the TLS config with one that follows OCSP.
-			config.apply(tc)
+			config.apply(kind, tc)
 
 			s.startGoRoutine(func() { mon.run() })
 		}

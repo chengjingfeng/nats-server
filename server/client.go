@@ -4953,21 +4953,6 @@ func (c *client) doTLSHandshake(typ string, solicit bool, url *url.URL, tlsConfi
 	// Capture kind for some debug/error statements.
 	kind := c.kind
 
-	/*
-	// HACK! FIX THIS!!!!
-	var rurl string
-	if url != nil {
-		rurl = url.String()
-	}
-	if typ == "leafnode" && rurl == "" {
-		// Configure tls.Config for leafnode server.
-		tlsConfig.ClientAuth = tls.RequireAndVerifyClientCert
-		tlsConfig.GetClientCertificate = nil
-	} else if typ == "leafnode" && rurl != "" {
-		// Configure tls.Config for leafnode client.
-		tlsConfig.GetCertificate = nil
-	}
-	*/
 	c.Debugf("doTLSHandshake - typ=%q - tlsConfig.GetCertificate nil: %t", typ, tlsConfig.GetCertificate == nil)
 	c.Debugf("doTLSHandshake - typ=%q - tlsConfig.VerifyConnection nil: %t", typ, tlsConfig.VerifyConnection == nil)
 	c.Debugf("doTLSHandshake - typ=%q - tlsConfig.GetClientCertificate nil: %t", typ, tlsConfig.GetCertificate == nil)

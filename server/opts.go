@@ -1978,6 +1978,7 @@ func parseGateways(v interface{}, errors *[]error, warnings *[]error) ([]*Remote
 				}
 				gateway.TLSConfig = tls
 				gateway.TLSTimeout = tlsopts.Timeout
+				gateway.tlsConfigOpts = tlsopts
 			case "url":
 				url, err := parseURL(v.(string), "gateway")
 				if err != nil {

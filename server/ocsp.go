@@ -416,7 +416,7 @@ func (srv *Server) NewOCSPMonitor(config *tlsConfigKind) (*tls.Config, *OCSPMoni
 		}
 
 		// Check whether need to verify staples from a client connection depending on the type.
-		fmt.Println(">>>>>>>>>>>>", kind)
+		fmt.Println(">>>>>>>>>>>>", opts.ServerName, kind)
 		switch kind {
 		case typeStringMap[ROUTER], typeStringMap[GATEWAY], typeStringMap[LEAF]:
 			tc.VerifyConnection = func(s tls.ConnectionState) error {
